@@ -23,6 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.0.4
+  provider: ^5.0.0
   cupertino_icons: ^1.0.2
   pointycastle: ^2.0.1
   flutter_spinkit: ^5.0.0

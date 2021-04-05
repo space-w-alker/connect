@@ -7,8 +7,9 @@ class AppButton extends StatefulWidget {
   final AsyncCallback onPressed;
   final double width;
   final double height;
+  final Color color;
 
-  AppButton({@required this.label, @required this.onPressed, this.width = 150, this.height = 50});
+  AppButton({@required this.label, @required this.onPressed, this.width = 120, this.height = 40, this.color });
 
   @override
   _AppButtonState createState() => _AppButtonState();
@@ -29,15 +30,15 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: widget.width,
       height: widget.height,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(horizontal: 12),
-          primary: Colors.grey[800],
+          primary: widget.color ?? Colors.grey[800],
         ),
-        onPressed: isLoading ? null : pressedCallback,
+        onPressed: isLoading || widget.onPressed == null ? null : pressedCallback,
         child: Center(
           child: isLoading ? LoadingView() : Text(widget.label, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w200),),
         ),

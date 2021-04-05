@@ -16,9 +16,9 @@ class _AnimInOutState extends State<AnimInOut> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-    opacityAnimation = CurvedAnimation(parent: controller, curve: Curves.easeOutCirc);
-    offsetAnimation = Tween(begin: Offset(0,10), end: Offset(0,0)).animate(opacityAnimation);
+    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 200));
+    opacityAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
+    offsetAnimation = Tween(begin: Offset(0,0.1), end: Offset(0,0)).animate(opacityAnimation);
     controller.forward();
   }
 
