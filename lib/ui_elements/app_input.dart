@@ -13,6 +13,7 @@ class _AppInputState extends State<AppInput>
   AnimationController controller;
   Animation animation;
   Animation offset;
+  FocusNode focusNode;
   @override
   void initState() {
     super.initState();
@@ -21,43 +22,49 @@ class _AppInputState extends State<AppInput>
     animation = CurvedAnimation(parent: controller, curve: Curves.easeOutSine);
     offset = Tween(begin: Offset(0, 5), end: Offset(0, 0)).animate(animation);
     controller.forward();
+    focusNode = FocusNode();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: animation,
-      child: ScaleTransition(
-        scale: animation,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.inputArgs.label,
-              style: TextStyle(
-                  fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 12),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              // height: 40,
-              // width: 400,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6,
-                      offset: Offset(2, 2)),
-                ],
+    return GestureDetector(
+      onTap: (){
+        focusNode.requestFocus();
+      },
+      child: FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: animation,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.inputArgs.label,
+                style: TextStyle(
+                    fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 12),
               ),
-              child: buildRow(),
-            ),
-          ],
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                // height: 40,
+                // width: 400,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(2, 2)),
+                  ],
+                ),
+                child: buildRow(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -83,7 +90,6 @@ class _AppInputState extends State<AppInput>
           Expanded(
             child: TextFormField(
               controller: widget.inputArgs.controller,
-              autofocus: true,
               decoration: InputDecoration.collapsed(
                 hintText: widget.inputArgs.hintText,
                 hintStyle: TextStyle(
@@ -94,6 +100,7 @@ class _AppInputState extends State<AppInput>
                 ),
               ),
               style: TextStyle(fontSize: 18),
+              focusNode: focusNode,
             ),
           ),
         ],

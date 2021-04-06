@@ -1,19 +1,27 @@
+import 'package:flutter_app/screens/home/home_page.dart';
 import 'package:flutter_app/screens/not_found_screen/not_found_screen.dart';
 import 'package:flutter_app/screens/authentication/auth_screen.dart';
 import 'package:flutter_app/screens/landing/landing_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/constants/page_names.dart';
 
 class AppRouter {
   static Route<dynamic> routeAll(RouteSettings settings) {
-    if (settings.name == "/") {
+    if (settings.name == LANDING) {
+      return MaterialPageRoute(builder: (context) {
+        return LandingScreen();
+      });
+    } else if (settings.name == AUTH_PAGE) {
       return MaterialPageRoute(builder: (context) {
         return AuthScreen();
       });
-    } else if (settings.name == "/auth") {
-      return MaterialPageRoute(builder: (context) {
-        return AuthScreen();
+    }
+    else if (settings.name == HOME){
+      return MaterialPageRoute(builder: (context){
+        return HomePage();
       });
-    } else {
+    }
+    else {
       return MaterialPageRoute(builder: (context) {
         return NotFoundScreen();
       });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/constants/page_names.dart';
 
 class LandingScreen extends StatefulWidget {
   @override
@@ -41,7 +42,9 @@ class _LandingScreenState extends State<LandingScreen> {
                 IconButton(
                   icon: Icon(Icons.double_arrow_outlined),
                   color: Colors.white,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, AUTH_PAGE);
+                  },
                   iconSize: 44,
                 ),
               ],
