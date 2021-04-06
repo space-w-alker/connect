@@ -106,7 +106,7 @@ class _LoginViewState extends State<LoginView> {
               "Enter Key",
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   letterSpacing: 3,
                   fontWeight: FontWeight.w900),
             ),

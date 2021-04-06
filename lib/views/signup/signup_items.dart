@@ -26,13 +26,13 @@ class _SingleWordState extends State<SingleWord> with SingleTickerProviderStateM
       child: FadeTransition(
         opacity: scaleAnim,
         child: Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
                 colors: <Color>[Colors.grey[900], Colors.grey[600]],
                 begin: Alignment.bottomRight,
                 end: Alignment.topLeft),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(40),
           ),
           child: Text(
             widget.text.toString(),

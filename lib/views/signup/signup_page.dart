@@ -140,7 +140,7 @@ class _SignUpViewState extends State<SignUpView> {
             "Generate Key",
             style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 18,
                 letterSpacing: 3,
                 fontWeight: FontWeight.w900),
           ),
