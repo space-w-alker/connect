@@ -4,12 +4,13 @@ import 'package:flutter_app/screens/authentication/auth_screen.dart';
 import 'package:flutter_app/screens/landing/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/page_names.dart';
+import 'package:flutter_app/views/test_database.dart';
 
 class AppRouter {
   static Route<dynamic> routeAll(RouteSettings settings) {
     if (settings.name == LANDING) {
       return MaterialPageRoute(builder: (context) {
-        return LandingScreen();
+        return TestDataBase();
       });
     } else if (settings.name == AUTH_PAGE) {
       return MaterialPageRoute(builder: (context) {
