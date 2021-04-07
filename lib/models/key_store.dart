@@ -26,6 +26,7 @@ class LocalData {
   String leaderName;
   String teamName;
   int teamCount;
+  String teamType;
 
   LocalData(
       {this.id,
@@ -33,14 +34,16 @@ class LocalData {
       this.publicKey,
       this.leaderName = "NULL",
       this.teamCount = 0,
-      this.teamName = "NULL"});
+      this.teamName = "NULL",
+      this.teamType = "main"});
   LocalData.fromMap(Map<dynamic, dynamic> map)
       : id = map[ID],
         publicKey = map[PUBLIC_KEY],
         privateKey = map[PRIVATE_KEY],
         leaderName = map[TEAM_LEADER],
         teamName = map[TEAM_NAME],
-        teamCount = map[TEAM_COUNT];
+        teamCount = map[TEAM_COUNT],
+        teamType = map[TEAM_TYPE];
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
