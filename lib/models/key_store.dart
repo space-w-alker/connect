@@ -66,7 +66,7 @@ class LocalDataProvider {
         batch.execute('''
         create table $TABLE_NAME (
           $ID integer primary key autoincrement,
-          $PUBLIC_KEY text primary key not null,
+          $PUBLIC_KEY text not null,
           $PRIVATE_KEY text not null,
           $TEAM_NAME text,
           $TEAM_LEADER text,
