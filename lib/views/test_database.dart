@@ -11,8 +11,8 @@ class TestDataBase extends StatefulWidget {
 class _TestDataBaseState extends State<TestDataBase> {
   AppInputArgs privateKeyInput;
   AppInputArgs publicKeyInput;
-  KeyStoreProvider provider;
-  List<KeyStore> keys;
+  LocalDataProvider provider;
+  List<LocalData> keys;
   @override
   void initState() {
     super.initState();
@@ -25,8 +25,8 @@ class _TestDataBaseState extends State<TestDataBase> {
         hintText: "Enter the public key",
         label: "Public Key");
     keys = [];
-    provider = KeyStoreProvider();
-    //provider.open();
+    provider = LocalDataProvider();
+    provider.open();
   }
 
   @override
@@ -54,19 +54,21 @@ class _TestDataBaseState extends State<TestDataBase> {
                   label: "Add To Table",
                   onPressed: () async {
                     if (provider.db.isOpen) {
-                      await provider.insert(KeyStore(
+                      await provider.insert(LocalData(
                           privateKey: privateKeyInput.controller.text,
                           publicKey: publicKeyInput.controller.text));
                     }
                   }),
-              AppButton(label: "Get All", onPressed: () async {
-                if(provider.db.isOpen){
-                  var l = await provider.getAll();
-                  setState(() {
-                    keys = l;
-                  });
-                }
-              })
+              AppButton(
+                  label: "Get All",
+                  onPressed: () async {
+                    if (provider.db.isOpen) {
+                      var l = await provider.getAll();
+                      setState(() {
+                        keys = l;
+                      });
+                    }
+                  })
             ],
           )
         ],

@@ -3,21 +3,44 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 const String DB_PATH = "key_store_path.db";
-const String TABLE_NAME = "key_store_table";
+const String TABLE_NAME = "app_data_table";
 const String ID = "_id";
 const String PUBLIC_KEY = "public_key";
 const String PRIVATE_KEY = "private_key";
+const String TEAM_NAME = "team_name";
+const String TEAM_LEADER = "team_leader";
+const String TEAM_COUNT = "team_count";
+const String TEAM_TYPE = 'team_type';
 
-class KeyStore {
+const String INVENTORY_TABLE_NAME = 'inventory_table_name';
+const String ITEM_ID = '_id';
+const String ITEM_TYPE = 'item_type';
+const String ITEM_COUNT = 'item_count';
+
+const String COMMUNICATE_TABLE_NAME = 'comm_table_name';
+
+class LocalData {
   int id;
   final String publicKey;
   final String privateKey;
+  String leaderName;
+  String teamName;
+  int teamCount;
 
-  KeyStore({this.id, this.privateKey, this.publicKey});
-  KeyStore.fromMap(Map<dynamic, dynamic> map)
+  LocalData(
+      {this.id,
+      this.privateKey,
+      this.publicKey,
+      this.leaderName = "NULL",
+      this.teamCount = 0,
+      this.teamName = "NULL"});
+  LocalData.fromMap(Map<dynamic, dynamic> map)
       : id = map[ID],
         publicKey = map[PUBLIC_KEY],
-        privateKey = map[PRIVATE_KEY];
+        privateKey = map[PRIVATE_KEY],
+        leaderName = map[TEAM_LEADER],
+        teamName = map[TEAM_NAME],
+        teamCount = map[TEAM_COUNT];
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -28,48 +51,64 @@ class KeyStore {
   }
 }
 
-class KeyStoreProvider {
+class LocalDataProvider {
   Database db;
   Future open() async {
     String dbPath = join(await getDatabasesPath(), DB_PATH);
     db = await openDatabase(
       dbPath,
-      version: 1,
+      version: 3,
       onCreate: (db, version) {
-        db.execute('''
-      create table $TABLE_NAME (
-      $ID integer primary key autoincrement
-      $PUBLIC_KEY text not null
-      $PRIVATE_KEY text not null
-      )
-      ''');
+        var batch = db.batch();
+        batch.execute('''
+        create table $TABLE_NAME (
+          $ID integer primary key autoincrement,
+          $PUBLIC_KEY text primary key not null,
+          $PRIVATE_KEY text not null,
+          $TEAM_NAME text,
+          $TEAM_LEADER text,
+          $TEAM_COUNT integer
+        )
+        ''');
+        batch.execute('''
+        create table $INVENTORY_TABLE_NAME(
+          $ITEM_ID integer primary key autoincrement,
+          $ITEM_TYPE string not null,
+          $ITEM_COUNT integer not null,
+          $PUBLIC_KEY integer not null,
+          foreign key ($PUBLIC_KEY) references $TABLE_NAME ($PUBLIC_KEY)
+        )
+        ''');
+        batch.commit();
       },
     );
   }
 
-  Future insert(KeyStore keyStore) async {
-    keyStore.id = await db.insert(TABLE_NAME, keyStore.toMap(), conflictAlgorithm: ConflictAlgorithm.fail);
+  Future insert(LocalData keyStore) async {
+    keyStore.id = await db.insert(TABLE_NAME, keyStore.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
-  Future<KeyStore> getKeyStore(int id) async{
-    List<Map> maps = await db.query(TABLE_NAME, where: "$ID = ?", whereArgs: [id]);
-    if(maps.length > 0){
-      return KeyStore.fromMap(maps.first);
+  Future<LocalData> getKeyStore(int id) async {
+    List<Map> maps =
+        await db.query(TABLE_NAME, where: "$ID = ?", whereArgs: [id]);
+    if (maps.length > 0) {
+      return LocalData.fromMap(maps.first);
     }
-    return KeyStore(id: -1, privateKey: "-1", publicKey: "-1");
+    return LocalData(id: -1, privateKey: "-1", publicKey: "-1");
   }
 
-  Future<List<KeyStore>> getAll()async{
+  Future<List<LocalData>> getAll() async {
     List<Map> maps = await db.query(TABLE_NAME);
-    return maps.map((e) => KeyStore.fromMap(e));
+    return maps.map((e) => LocalData.fromMap(e)).toList();
   }
 
-  Future<int> update(KeyStore keyStore) async {
+  Future<int> update(LocalData keyStore) async {
     return await db.update(TABLE_NAME, keyStore.toMap(),
-      where: '$ID = ?', whereArgs: [keyStore.id]);
+        where: '$ID = ?', whereArgs: [keyStore.id]);
   }
 
-  Future close() async{
+  Future close() async {
     await db.close();
   }
 }

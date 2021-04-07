@@ -13,7 +13,6 @@ class _SingleWordState extends State<SingleWord> with SingleTickerProviderStateM
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     controller = AnimationController(vsync: this, duration: Duration(milliseconds: 2000));
     scaleAnim = CurvedAnimation(parent: controller, curve: Curves.elasticOut);
