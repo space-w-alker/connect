@@ -19,7 +19,7 @@ const String ITEM_COUNT = 'item_count';
 
 const String COMMUNICATE_TABLE_NAME = 'comm_table_name';
 
-class LocalData {
+class TeamData {
   int id;
   final String publicKey;
   final String privateKey;
@@ -28,7 +28,7 @@ class LocalData {
   int teamCount;
   String teamType;
 
-  LocalData(
+  TeamData(
       {this.id,
       this.privateKey,
       this.publicKey,
@@ -36,7 +36,7 @@ class LocalData {
       this.teamCount = 0,
       this.teamName = "NULL",
       this.teamType = "main"});
-  LocalData.fromMap(Map<dynamic, dynamic> map)
+  TeamData.fromMap(Map<dynamic, dynamic> map)
       : id = map[ID],
         publicKey = map[PUBLIC_KEY],
         privateKey = map[PRIVATE_KEY],
@@ -54,7 +54,7 @@ class LocalData {
   }
 }
 
-class LocalDataProvider {
+class TeamDataProvider {
   Database db;
   Future open() async {
     String dbPath = join(await getDatabasesPath(), DB_PATH);
@@ -87,26 +87,26 @@ class LocalDataProvider {
     );
   }
 
-  Future insert(LocalData keyStore) async {
+  Future insert(TeamData keyStore) async {
     keyStore.id = await db.insert(TABLE_NAME, keyStore.toMap(),
         conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
-  Future<LocalData> getKeyStore(int id) async {
+  Future<TeamData> getKeyStore(int id) async {
     List<Map> maps =
         await db.query(TABLE_NAME, where: "$ID = ?", whereArgs: [id]);
     if (maps.length > 0) {
-      return LocalData.fromMap(maps.first);
+      return TeamData.fromMap(maps.first);
     }
-    return LocalData(id: -1, privateKey: "-1", publicKey: "-1");
+    return TeamData(id: -1, privateKey: "-1", publicKey: "-1");
   }
 
-  Future<List<LocalData>> getAll() async {
+  Future<List<TeamData>> getAll() async {
     List<Map> maps = await db.query(TABLE_NAME);
-    return maps.map((e) => LocalData.fromMap(e)).toList();
+    return maps.map((e) => TeamData.fromMap(e)).toList();
   }
 
-  Future<int> update(LocalData keyStore) async {
+  Future<int> update(TeamData keyStore) async {
     return await db.update(TABLE_NAME, keyStore.toMap(),
         where: '$ID = ?', whereArgs: [keyStore.id]);
   }
