@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import "package:pointycastle/export.dart";
 import "package:asn1lib/asn1lib.dart";
 import 'aes_encrypt_decrypt.dart';
@@ -43,53 +44,66 @@ List<int> decodePEM(String pem) {
   return base64.decode(pem);
 }
 
-class RsaKeyHelper {
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateKeyPair() {
-    var keyParams =
-        new RSAKeyGeneratorParameters(BigInt.parse('65537'), 2048, 12);
+Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeyPairAsync() async {
+  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await compute((String m) {
+    return generateKeyPair();
+  }, "Message");
+  return keyPair;
+}
 
-    var secureRandom = new FortunaRandom();
-    var random = new Random.secure();
-    List<int> seeds = [];
-    for (int i = 0; i < 32; i++) {
-      seeds.add(random.nextInt(255));
-    }
-    secureRandom.seed(new KeyParameter(new Uint8List.fromList(seeds)));
+AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateKeyPair() {
+  var keyParams = new RSAKeyGeneratorParameters(BigInt.parse('65537'), 128, 12);
 
-    var rngParams = new ParametersWithRandom(keyParams, secureRandom);
-    var k = new RSAKeyGenerator();
-    k.init(rngParams);
-
-    return k.generateKeyPair();
+  var secureRandom = new FortunaRandom();
+  var random = new Random.secure();
+  List<int> seeds = [];
+  for (int i = 0; i < 32; i++) {
+    seeds.add(random.nextInt(255));
   }
+  secureRandom.seed(new KeyParameter(new Uint8List.fromList(seeds)));
 
+  var rngParams = new ParametersWithRandom(keyParams, secureRandom);
+  var k = new RSAKeyGenerator();
+  k.init(rngParams);
+
+  final pair = k.generateKeyPair();
+  // Cast the generated key pair into the RSA key types
+
+  final myPublic = pair.publicKey as RSAPublicKey;
+  final myPrivate = pair.privateKey as RSAPrivateKey;
+
+  return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
+}
+
+class RsaKeyHelper {
   String encrypt(String plaintext, RSAPublicKey publicKey) {
-    var cipher = new RSAEngine()
-      ..init(true, new PublicKeyParameter<RSAPublicKey>(publicKey));
-    var cipherText =
-        cipher.process(new Uint8List.fromList(plaintext.codeUnits));
+    var cipher = new RSAEngine()..init(true, new PublicKeyParameter<RSAPublicKey>(publicKey));
+    var cipherText = cipher.process(new Uint8List.fromList(plaintext.codeUnits));
 
     return new String.fromCharCodes(cipherText);
   }
 
   String decrypt(String ciphertext, RSAPrivateKey privateKey) {
-    var cipher = new RSAEngine()
-      ..init(false, new PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    var decrypted =
-        cipher.process(new Uint8List.fromList(ciphertext.codeUnits));
+    var cipher = new RSAEngine()..init(false, new PrivateKeyParameter<RSAPrivateKey>(privateKey));
+    var decrypted = cipher.process(new Uint8List.fromList(ciphertext.codeUnits));
 
     return new String.fromCharCodes(decrypted);
   }
 
-  Future<String> encryptPrivateKey(
-      RSAPrivateKey privateKey, List<String> symmKey) async {
+  Future<String> encryptPrivateKey(RSAPrivateKey privateKey, List<String> symmKey) async {
     String key = encodePrivateKeyToPem(privateKey);
     Uint8List l = await symmetricEncrypt(symmKey, key);
     return JsonEncoder().convert(l.toList());
   }
 
-  Future<String> decryptPrivateKey(
-      String privateKeyCipher, List<String> symmKey) {}
+  Future<RSAPrivateKey> decryptPrivateKey(String privateKeyCipher, List<String> symmKey) async {
+    List<dynamic> privateKeyCipherList = (JsonDecoder().convert(privateKeyCipher) as List<dynamic>);
+    Uint8List cipherKey = Uint8List.fromList(privateKeyCipherList.map((e) {
+      return e as int;
+    }).toList());
+    Uint8List plainKey = await symmetricDecrypt(symmKey, String.fromCharCodes(cipherKey));
+    return parsePrivateKeyFromPem(String.fromCharCodes(plainKey));
+  }
 
   RSAPublicKey parsePublicKeyFromPem(pemString) {
     List<int> publicKeyDER = decodePEM(pemString);
@@ -102,8 +116,7 @@ class RsaKeyHelper {
     var modulus = publicKeySeq.elements[0] as ASN1Integer;
     var exponent = publicKeySeq.elements[1] as ASN1Integer;
 
-    RSAPublicKey rsaPublicKey =
-        RSAPublicKey(modulus.valueAsBigInteger, exponent.valueAsBigInteger);
+    RSAPublicKey rsaPublicKey = RSAPublicKey(modulus.valueAsBigInteger, exponent.valueAsBigInteger);
 
     return rsaPublicKey;
   }
@@ -129,29 +142,22 @@ class RsaKeyHelper {
     var exp2 = pkSeq.elements[7] as ASN1Integer;
     var co = pkSeq.elements[8] as ASN1Integer;
 
-    RSAPrivateKey rsaPrivateKey = RSAPrivateKey(
-        modulus.valueAsBigInteger,
-        privateExponent.valueAsBigInteger,
-        p.valueAsBigInteger,
-        q.valueAsBigInteger);
+    RSAPrivateKey rsaPrivateKey = RSAPrivateKey(modulus.valueAsBigInteger, privateExponent.valueAsBigInteger, p.valueAsBigInteger, q.valueAsBigInteger);
 
     return rsaPrivateKey;
   }
 
   String encodePublicKeyToPem(RSAPublicKey publicKey) {
     var algorithmSeq = new ASN1Sequence();
-    var algorithmAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList(
-        [0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x1, 0x1, 0x1]));
-    var paramsAsn1Obj =
-        new ASN1Object.fromBytes(Uint8List.fromList([0x5, 0x0]));
+    var algorithmAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList([0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x1, 0x1, 0x1]));
+    var paramsAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList([0x5, 0x0]));
     algorithmSeq.add(algorithmAsn1Obj);
     algorithmSeq.add(paramsAsn1Obj);
 
     var publicKeySeq = new ASN1Sequence();
     publicKeySeq.add(ASN1Integer(publicKey.modulus));
     publicKeySeq.add(ASN1Integer(publicKey.exponent));
-    var publicKeySeqBitString =
-        new ASN1BitString(Uint8List.fromList(publicKeySeq.encodedBytes));
+    var publicKeySeqBitString = new ASN1BitString(Uint8List.fromList(publicKeySeq.encodedBytes));
 
     var topLevelSeq = new ASN1Sequence();
     topLevelSeq.add(algorithmSeq);
@@ -165,10 +171,8 @@ class RsaKeyHelper {
     var version = ASN1Integer(BigInt.from(0));
 
     var algorithmSeq = new ASN1Sequence();
-    var algorithmAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList(
-        [0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x1, 0x1, 0x1]));
-    var paramsAsn1Obj =
-        new ASN1Object.fromBytes(Uint8List.fromList([0x5, 0x0]));
+    var algorithmAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList([0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x1, 0x1, 0x1]));
+    var paramsAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList([0x5, 0x0]));
     algorithmSeq.add(algorithmAsn1Obj);
     algorithmSeq.add(paramsAsn1Obj);
 
@@ -194,8 +198,7 @@ class RsaKeyHelper {
     privateKeySeq.add(exp1);
     privateKeySeq.add(exp2);
     privateKeySeq.add(co);
-    var publicKeySeqOctetString =
-        new ASN1OctetString(Uint8List.fromList(privateKeySeq.encodedBytes));
+    var publicKeySeqOctetString = new ASN1OctetString(Uint8List.fromList(privateKeySeq.encodedBytes));
 
     var topLevelSeq = new ASN1Sequence();
     topLevelSeq.add(version);

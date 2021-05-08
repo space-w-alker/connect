@@ -9,12 +9,10 @@ Uint8List getIV() {
   return Uint8List.fromList(s.codeUnits);
 }
 
-Uint8List _aesCbcEncrypt(
-    Uint8List key, Uint8List iv, Uint8List paddedPlaintext) {
+Uint8List _aesCbcEncrypt(Uint8List key, Uint8List iv, Uint8List paddedPlaintext) {
   // Create a CBC block cipher with AES, and initialize with key and IV
 
-  final cbc = CBCBlockCipher(AESFastEngine())
-    ..init(true, ParametersWithIV(KeyParameter(key), iv)); // true=encrypt
+  final cbc = CBCBlockCipher(AESFastEngine())..init(true, ParametersWithIV(KeyParameter(key), iv)); // true=encrypt
 
   // Encrypt the plaintext block-by-block
 
@@ -32,8 +30,7 @@ Uint8List _aesCbcEncrypt(
 Uint8List _aesCbcDecrypt(Uint8List key, Uint8List iv, Uint8List cipherText) {
   // Create a CBC block cipher with AES, and initialize with key and IV
 
-  final cbc = CBCBlockCipher(AESFastEngine())
-    ..init(false, ParametersWithIV(KeyParameter(key), iv)); // false=decrypt
+  final cbc = CBCBlockCipher(AESFastEngine())..init(false, ParametersWithIV(KeyParameter(key), iv)); // false=decrypt
 
   // Decrypt the cipherText block-by-block
 
@@ -54,12 +51,15 @@ Future<Uint8List> symmetricEncrypt(List<String> key, String plainText) async {
 
 Future<Uint8List> symmetricDecrypt(List<String> key, String cipherText) async {
   Uint8List intKey = await wordsToKey(key);
-  return _aesCbcDecrypt(
-      intKey, getIV(), Uint8List.fromList(cipherText.codeUnits));
+  List<int> toReturn = _aesCbcDecrypt(intKey, getIV(), Uint8List.fromList(cipherText.codeUnits)).toList();
+  while (toReturn.last == "#".codeUnitAt(0)) {
+    toReturn.removeAt(toReturn.length - 1);
+  }
+  return Uint8List.fromList(toReturn);
 }
 
 Uint8List padText(String text) {
-  List list = text.codeUnits;
+  List list = text.codeUnits.toList();
   if (list.length % 16 != 0) {
     int to = 16 - (list.length % 16);
     for (int i = 0; i < to; i++) {
