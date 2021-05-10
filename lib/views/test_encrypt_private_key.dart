@@ -27,11 +27,9 @@ class _TestEncryptPrivateKeyState extends State<TestEncryptPrivateKey> {
       privateKeyPem = helper.encodePrivateKeyToPem(privateKey);
     });
     List<String> symmKey = await keyToWords(generateKey());
-    String encryptedPrivateKey =
-        await helper.encryptPrivateKey(privateKey, symmKey);
+    String encryptedPrivateKey = await helper.encryptPrivateKey(privateKey, symmKey);
 
-    RSAPrivateKey decryptedPrivateKey =
-        await helper.decryptPrivateKey(encryptedPrivateKey, symmKey);
+    RSAPrivateKey decryptedPrivateKey = await helper.decryptPrivateKey(encryptedPrivateKey, symmKey);
     setState(() {
       decryptedPem = helper.encodePrivateKeyToPem(decryptedPrivateKey);
     });
@@ -48,7 +46,7 @@ class _TestEncryptPrivateKeyState extends State<TestEncryptPrivateKey> {
           ListTile(
             title: Text(decryptedPem),
           ),
-          AppButton(label: "Submit", onPressed: encryptDecrypt),
+          AppButtonAsync(label: "Submit", onPressed: encryptDecrypt),
         ],
       ),
     );

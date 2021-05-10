@@ -77,7 +77,7 @@ class _LoginViewState extends State<LoginView> {
           SizedBox(
             height: 20,
           ),
-          AppButton(label: "Submit", onPressed: () async {}),
+          AppButtonAsync(label: "Submit", onPressed: () async {}),
           SizedBox(
             height: 20,
           ),
@@ -92,35 +92,30 @@ class _LoginViewState extends State<LoginView> {
 
   Container buildTitle() {
     return Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(18),
-          // boxShadow: <BoxShadow>[
-          //   BoxShadow(color: Colors.black, blurRadius: 10)
-          // ],
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Text(
-              "Enter Key",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  letterSpacing: 3,
-                  fontWeight: FontWeight.w900),
-            ),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(18),
+        // boxShadow: <BoxShadow>[
+        //   BoxShadow(color: Colors.black, blurRadius: 10)
+        // ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Text(
+            "Enter Key",
+            style: TextStyle(color: Colors.white, fontSize: 18, letterSpacing: 3, fontWeight: FontWeight.w900),
           ),
         ),
-      );
+      ),
+    );
   }
 
   ExpansionTile buildUpdateView() {
     return ExpansionTile(
       title: Container(
         padding: EdgeInsets.symmetric(vertical: 16),
-        decoration:
-            BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12))),
         child: Text(
           "Update Details",
           style: TextStyle(color: Colors.black),
@@ -142,5 +137,4 @@ class _LoginViewState extends State<LoginView> {
       ],
     );
   }
-
 }

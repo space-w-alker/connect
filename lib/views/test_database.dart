@@ -16,17 +16,9 @@ class _TestDataBaseState extends State<TestDataBase> {
   @override
   void initState() {
     super.initState();
-    privateKeyInput = AppInputArgs(
-        controller: TextEditingController(),
-        hintText: "Enter the private key",
-        label: "Private Key");
-    publicKeyInput = AppInputArgs(
-        controller: TextEditingController(),
-        hintText: "Enter the public key",
-        label: "Public Key");
+    privateKeyInput = AppInputArgs(controller: TextEditingController(), hintText: "Enter the private key", label: "Private Key");
+    publicKeyInput = AppInputArgs(controller: TextEditingController(), hintText: "Enter the public key", label: "Public Key");
     keys = [];
-    provider = TeamDataProvider();
-    provider.open();
   }
 
   @override
@@ -50,20 +42,18 @@ class _TestDataBaseState extends State<TestDataBase> {
           AppInput(inputArgs: publicKeyInput),
           Row(
             children: [
-              AppButton(
+              AppButtonAsync(
                   label: "Add To Table",
                   onPressed: () async {
-                    if (provider.db.isOpen) {
-                      await provider.insert(TeamData(
-                          privateKey: privateKeyInput.controller.text,
-                          publicKey: publicKeyInput.controller.text));
+                    if (TeamDataProvider.db.isOpen) {
+                      await TeamDataProvider.insert(TeamData(privateKey: privateKeyInput.controller.text, publicKey: publicKeyInput.controller.text));
                     }
                   }),
-              AppButton(
+              AppButtonAsync(
                   label: "Get All",
                   onPressed: () async {
-                    if (provider.db.isOpen) {
-                      var l = await provider.getAll();
+                    if (TeamDataProvider.db.isOpen) {
+                      var l = await TeamDataProvider.getAll();
                       setState(() {
                         keys = l;
                       });

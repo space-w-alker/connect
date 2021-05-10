@@ -5,7 +5,7 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SpinKitWave(
-      color: Colors.black45,
+      color: Colors.grey[200],
       size: 25,
     );
   }

@@ -8,8 +8,7 @@ class AppInput extends StatefulWidget {
   _AppInputState createState() => _AppInputState();
 }
 
-class _AppInputState extends State<AppInput>
-    with SingleTickerProviderStateMixin {
+class _AppInputState extends State<AppInput> with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation animation;
   Animation offset;
@@ -17,8 +16,7 @@ class _AppInputState extends State<AppInput>
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+    controller = AnimationController(duration: Duration(milliseconds: 300), vsync: this);
     animation = CurvedAnimation(parent: controller, curve: Curves.easeOutSine);
     offset = Tween(begin: Offset(0, 5), end: Offset(0, 0)).animate(animation);
     controller.forward();
@@ -28,7 +26,7 @@ class _AppInputState extends State<AppInput>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         focusNode.requestFocus();
       },
       child: FadeTransition(
@@ -41,8 +39,7 @@ class _AppInputState extends State<AppInput>
             children: [
               Text(
                 widget.inputArgs.label,
-                style: TextStyle(
-                    fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 12),
               ),
               SizedBox(
                 height: 10,
@@ -55,10 +52,7 @@ class _AppInputState extends State<AppInput>
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: <BoxShadow>[
-                    BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(2, 2)),
+                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(2, 2)),
                   ],
                 ),
                 child: buildRow(),
@@ -86,7 +80,9 @@ class _AppInputState extends State<AppInput>
               ),
             ],
           ),
-          SizedBox(width: 4,),
+          SizedBox(
+            width: 4,
+          ),
           Expanded(
             child: TextFormField(
               controller: widget.inputArgs.controller,
@@ -121,15 +117,10 @@ class AppInputArgs {
   String label;
   TextEditingController controller;
   String hintText;
+  TextInputType type;
   FocusNode focusNode;
   IconData icon;
   List<IsError> errors;
 
-  AppInputArgs(
-      {this.controller,
-      this.hintText,
-      this.focusNode,
-      this.label,
-      this.icon,
-      this.errors = const <IsError>[]});
+  AppInputArgs({this.controller, this.hintText, this.type, this.focusNode, this.label, this.icon, this.errors = const <IsError>[]});
 }

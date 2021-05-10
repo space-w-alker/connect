@@ -61,19 +61,19 @@ class _TestEncryptionState extends State<TestEncryption> {
             title: Text(decryptedText),
           ),
           Center(
-            child: AppButton(
+            child: AppButtonAsync(
               label: "Generate Key",
               onPressed: signUpClicked,
             ),
           ),
           Center(
-            child: AppButton(
+            child: AppButtonAsync(
               label: "Encrypt Text",
               onPressed: encrypt,
             ),
           ),
           Center(
-            child: AppButton(
+            child: AppButtonAsync(
               label: "Decrypt Text",
               onPressed: decrypt,
             ),

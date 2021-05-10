@@ -1,12 +1,17 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/encryption/rsa_pem.dart';
+import 'package:flutter_app/models/key_store.dart';
 import 'package:flutter_app/ui_elements/app_button_async.dart';
 import 'package:flutter_app/ui_elements/app_input.dart';
 import 'package:flutter_app/encryption/aes_key_generator.dart';
 import 'package:flutter_app/encryption/save_key.dart';
 import 'package:flutter_app/views/signup/signup_items.dart';
+import 'package:pointycastle/api.dart' as dart_api;
+import 'package:pointycastle/asymmetric/api.dart';
 
 class SignUpView extends StatefulWidget {
   final VoidCallback closeThis;
@@ -17,11 +22,13 @@ class SignUpView extends StatefulWidget {
 
 class _SignUpViewState extends State<SignUpView> {
   List<String> key;
+  RsaKeyHelper helper;
 
   Map<String, AppInputArgs> update = <String, AppInputArgs>{
     "team_name": AppInputArgs(
       controller: TextEditingController(),
       hintText: "Name of the team",
+      type: TextInputType.text,
       focusNode: FocusNode(),
       label: "Team Name",
       icon: Icons.short_text,
@@ -29,6 +36,7 @@ class _SignUpViewState extends State<SignUpView> {
     "head_count": AppInputArgs(
       controller: TextEditingController(),
       hintText: "Size of the Team",
+      type: TextInputType.number,
       focusNode: FocusNode(),
       label: "Head Count",
       icon: Icons.short_text,
@@ -37,9 +45,9 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    key = <String>["NULL", "NO-KEY"];
+    key = <String>["NO-KEY"];
+    helper = RsaKeyHelper();
   }
 
   Future<void> signUpClicked() async {
@@ -50,8 +58,25 @@ class _SignUpViewState extends State<SignUpView> {
     });
   }
 
+  void continueClicked() {
+    Map<String, Future<void>> loadFunctions = {};
+    loadFunctions.putIfAbsent("Generating RSA Private and Public keys...", () async {
+      dart_api.AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await generateRSAKeyPairAsync();
+      TeamData d = TeamData(privateKey: await helper.encryptPrivateKey(keyPair.privateKey, key), publicKey: helper.encodePublicKeyToPem(keyPair.publicKey));
+      d.teamName = update["team_name"].controller.text.isEmpty ? "NULL" : update["team_name"].controller.text;
+      d.teamCount = update["head_count"].controller.text.isEmpty ? "NULL" : int.parse(update["head_count"].controller.text);
+      TeamDataProvider.insert(d);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      TeamData main = await TeamDataProvider.getMain();
+      if (main.id != -1) {
+        showDialog(context: context, builder: (_) => deletePreviousUserDialog());
+      }
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -104,13 +129,13 @@ class _SignUpViewState extends State<SignUpView> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AppButton(label: "Generate Key", onPressed: signUpClicked),
+        AppButtonAsync(label: "Generate Key", onPressed: signUpClicked),
         SizedBox(
           width: 10,
         ),
-        AppButton(
+        AppButtonAsync(
           label: "Continue",
-          onPressed: null,
+          onPressed: key.length < 2 ? null : continueClicked,
         ),
       ],
     );
@@ -138,11 +163,7 @@ class _SignUpViewState extends State<SignUpView> {
           padding: const EdgeInsets.all(18.0),
           child: Text(
             "Generate Key",
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                letterSpacing: 3,
-                fontWeight: FontWeight.w900),
+            style: TextStyle(color: Colors.white, fontSize: 18, letterSpacing: 3, fontWeight: FontWeight.w900),
           ),
         ),
       ),
@@ -161,8 +182,7 @@ class _SignUpViewState extends State<SignUpView> {
     return ExpansionTile(
       title: Container(
         padding: EdgeInsets.symmetric(vertical: 16),
-        decoration:
-            BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12))),
         child: Text(
           "Add Details",
           style: TextStyle(color: Colors.black),
@@ -181,6 +201,24 @@ class _SignUpViewState extends State<SignUpView> {
         SizedBox(
           height: 20,
         )
+      ],
+    );
+  }
+
+  CupertinoAlertDialog deletePreviousUserDialog() {
+    return CupertinoAlertDialog(
+      title: Text("A user already exists on this device,\nDo you want to overrite this user?"),
+      actions: [
+        CupertinoDialogAction(
+          child: Text("Yes"),
+          onPressed: () {
+            TeamDataProvider.deleteMain();
+          },
+        ),
+        CupertinoDialogAction(
+          child: Text("No"),
+          onPressed: widget.closeThis,
+        ),
       ],
     );
   }

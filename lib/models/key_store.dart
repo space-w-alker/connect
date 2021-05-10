@@ -28,14 +28,7 @@ class TeamData {
   int teamCount;
   String teamType;
 
-  TeamData(
-      {this.id,
-      this.privateKey,
-      this.publicKey,
-      this.leaderName = "NULL",
-      this.teamCount = 0,
-      this.teamName = "NULL",
-      this.teamType = "main"});
+  TeamData({this.id, this.privateKey, this.publicKey, this.leaderName = "NULL", this.teamCount = 0, this.teamName = "NULL", this.teamType = "main"});
   TeamData.fromMap(Map<dynamic, dynamic> map)
       : id = map[ID],
         publicKey = map[PUBLIC_KEY],
@@ -46,17 +39,13 @@ class TeamData {
         teamType = map[TEAM_TYPE];
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      ID: id,
-      PUBLIC_KEY: publicKey,
-      PRIVATE_KEY: privateKey
-    };
+    return <String, dynamic>{ID: id, PUBLIC_KEY: publicKey, PRIVATE_KEY: privateKey, TEAM_LEADER: leaderName, TEAM_NAME: teamName, TEAM_COUNT: teamCount, TEAM_TYPE: teamType};
   }
 }
 
 class TeamDataProvider {
-  Database db;
-  Future open() async {
+  static Database db;
+  static Future open() async {
     String dbPath = join(await getDatabasesPath(), DB_PATH);
     db = await openDatabase(
       dbPath,
@@ -87,31 +76,50 @@ class TeamDataProvider {
     );
   }
 
-  Future insert(TeamData keyStore) async {
-    keyStore.id = await db.insert(TABLE_NAME, keyStore.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.fail);
+  static Future insert(TeamData keyStore) async {
+    List<Map> maps = await db.query(TABLE_NAME, where: "$PUBLIC_KEY = ?", whereArgs: [keyStore.publicKey]);
+    if (maps.length > 0) {
+      throw ArgumentError("Duplicate Entry");
+    }
+    if (keyStore.teamType == "main") {
+      maps = await db.query(TABLE_NAME, where: "$TEAM_TYPE = ?", whereArgs: ["main"]);
+      if (maps.length > 0) {
+        throw ArgumentError("Duplicate Main Team Entry");
+      }
+    }
+    keyStore.id = await db.insert(TABLE_NAME, keyStore.toMap(), conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
-  Future<TeamData> getKeyStore(int id) async {
-    List<Map> maps =
-        await db.query(TABLE_NAME, where: "$ID = ?", whereArgs: [id]);
+  static Future<TeamData> getKeyStore(String publicKey) async {
+    List<Map> maps = await db.query(TABLE_NAME, where: "$PUBLIC_KEY = ?", whereArgs: [publicKey]);
     if (maps.length > 0) {
       return TeamData.fromMap(maps.first);
     }
     return TeamData(id: -1, privateKey: "-1", publicKey: "-1");
   }
 
-  Future<List<TeamData>> getAll() async {
+  static Future<TeamData> getMain() async {
+    List<Map> maps = await db.query(TABLE_NAME, where: "$TEAM_TYPE = ?", whereArgs: ["main"]);
+    if (maps.length > 0) {
+      return TeamData.fromMap(maps.first);
+    }
+    return TeamData(id: -1);
+  }
+
+  static Future<int> deleteMain() async {
+    return await db.delete(TABLE_NAME, where: "$TEAM_TYPE = ?", whereArgs: ["main"]);
+  }
+
+  static Future<List<TeamData>> getAll() async {
     List<Map> maps = await db.query(TABLE_NAME);
     return maps.map((e) => TeamData.fromMap(e)).toList();
   }
 
-  Future<int> update(TeamData keyStore) async {
-    return await db.update(TABLE_NAME, keyStore.toMap(),
-        where: '$ID = ?', whereArgs: [keyStore.id]);
+  static Future<int> update(TeamData keyStore) async {
+    return await db.update(TABLE_NAME, keyStore.toMap(), where: '$ID = ?', whereArgs: [keyStore.id]);
   }
 
-  Future close() async {
+  static Future close() async {
     await db.close();
   }
 }
