@@ -58,15 +58,18 @@ class _SignUpViewState extends State<SignUpView> {
     });
   }
 
-  void continueClicked() {
+  Future<void> registerUserKey() async {
+    //TODO: Why is this stupid function running;
+    dart_api.AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await generateRSAKeyPairAsync();
+    TeamData d = TeamData(privateKey: await helper.encryptPrivateKey(keyPair.privateKey, key), publicKey: helper.encodePublicKeyToPem(keyPair.publicKey));
+    d.teamName = update["team_name"].controller.text.isEmpty ? "NULL" : update["team_name"].controller.text;
+    d.teamCount = update["head_count"].controller.text.isEmpty ? 0 : int.parse(update["head_count"].controller.text);
+    TeamDataProvider.insert(d);
+  }
+
+  Future<void> continueClicked() async {
     Map<String, Future<void>> loadFunctions = {};
-    loadFunctions.putIfAbsent("Generating RSA Private and Public keys...", () async {
-      dart_api.AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await generateRSAKeyPairAsync();
-      TeamData d = TeamData(privateKey: await helper.encryptPrivateKey(keyPair.privateKey, key), publicKey: helper.encodePublicKeyToPem(keyPair.publicKey));
-      d.teamName = update["team_name"].controller.text.isEmpty ? "NULL" : update["team_name"].controller.text;
-      d.teamCount = update["head_count"].controller.text.isEmpty ? "NULL" : int.parse(update["head_count"].controller.text);
-      TeamDataProvider.insert(d);
-    });
+    loadFunctions.putIfAbsent("Generating RSA Private and Public keys...", registerUserKey);
   }
 
   @override
@@ -214,10 +217,12 @@ class _SignUpViewState extends State<SignUpView> {
           onPressed: () {
             TeamDataProvider.deleteMain();
           },
+          isDestructiveAction: true,
         ),
         CupertinoDialogAction(
           child: Text("No"),
           onPressed: widget.closeThis,
+          isDestructiveAction: true,
         ),
       ],
     );

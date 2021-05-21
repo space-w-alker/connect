@@ -22,7 +22,7 @@ class _TestEncryptPrivateKeyState extends State<TestEncryptPrivateKey> {
 
   Future<void> encryptDecrypt() async {
     final helper = RsaKeyHelper();
-    RSAPrivateKey privateKey = generateKeyPair().privateKey;
+    RSAPrivateKey privateKey = generateKeyPair("m").privateKey;
     setState(() {
       privateKeyPem = helper.encodePrivateKeyToPem(privateKey);
     });

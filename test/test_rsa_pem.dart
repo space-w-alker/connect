@@ -7,13 +7,11 @@ void main() {
   group("RsaKeyHelper", () {
     test("Generate, Encrypt and Decrypt private key", () async {
       final helper = RsaKeyHelper();
-      RSAPrivateKey privateKey = generateKeyPair().privateKey;
+      RSAPrivateKey privateKey = generateKeyPair("").privateKey;
       List<String> symmKey = await keyToWords(generateKey());
-      String encryptedPrivateKey =
-          await helper.encryptPrivateKey(privateKey, symmKey);
+      String encryptedPrivateKey = await helper.encryptPrivateKey(privateKey, symmKey);
 
-      RSAPrivateKey decryptedPrivateKey =
-          await helper.decryptPrivateKey(encryptedPrivateKey, symmKey);
+      RSAPrivateKey decryptedPrivateKey = await helper.decryptPrivateKey(encryptedPrivateKey, symmKey);
 
       expect(privateKey.privateExponent, decryptedPrivateKey.privateExponent);
       expect(privateKey.p, decryptedPrivateKey.p);

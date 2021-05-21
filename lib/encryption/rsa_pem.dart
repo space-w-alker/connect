@@ -45,13 +45,11 @@ List<int> decodePEM(String pem) {
 }
 
 Future<AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>> generateRSAKeyPairAsync() async {
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await compute((String m) {
-    return generateKeyPair();
-  }, "Message");
+  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await compute(generateKeyPair, "Message");
   return keyPair;
 }
 
-AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateKeyPair() {
+AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateKeyPair(String message) {
   var keyParams = new RSAKeyGeneratorParameters(BigInt.parse('65537'), 128, 12);
 
   var secureRandom = new FortunaRandom();

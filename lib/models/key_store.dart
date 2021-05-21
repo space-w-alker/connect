@@ -49,7 +49,7 @@ class TeamDataProvider {
     String dbPath = join(await getDatabasesPath(), DB_PATH);
     db = await openDatabase(
       dbPath,
-      version: 3,
+      version: 5,
       onCreate: (db, version) {
         var batch = db.batch();
         batch.execute('''
@@ -59,6 +59,7 @@ class TeamDataProvider {
           $PRIVATE_KEY text not null,
           $TEAM_NAME text,
           $TEAM_LEADER text,
+          $TEAM_TYPE text,
           $TEAM_COUNT integer
         )
         ''');
