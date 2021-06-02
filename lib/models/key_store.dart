@@ -28,7 +28,15 @@ class TeamData {
   int teamCount;
   String teamType;
 
-  TeamData({this.id, this.privateKey, this.publicKey, this.leaderName = "NULL", this.teamCount = 0, this.teamName = "NULL", this.teamType = "main"});
+  TeamData({
+    this.id,
+    this.privateKey,
+    this.publicKey,
+    this.leaderName = "NULL",
+    this.teamCount = 0,
+    this.teamName = "NULL",
+    this.teamType = "main",
+  });
   TeamData.fromMap(Map<dynamic, dynamic> map)
       : id = map[ID],
         publicKey = map[PUBLIC_KEY],
@@ -39,7 +47,15 @@ class TeamData {
         teamType = map[TEAM_TYPE];
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{ID: id, PUBLIC_KEY: publicKey, PRIVATE_KEY: privateKey, TEAM_LEADER: leaderName, TEAM_NAME: teamName, TEAM_COUNT: teamCount, TEAM_TYPE: teamType};
+    return <String, dynamic>{
+      ID: id,
+      PUBLIC_KEY: publicKey,
+      PRIVATE_KEY: privateKey,
+      TEAM_LEADER: leaderName,
+      TEAM_NAME: teamName,
+      TEAM_COUNT: teamCount,
+      TEAM_TYPE: teamType,
+    };
   }
 }
 

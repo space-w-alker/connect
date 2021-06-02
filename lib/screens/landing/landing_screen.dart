@@ -16,21 +16,21 @@ class _LandingScreenState extends State<LandingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
-              height: 400,
+            Expanded(
+              child: SizedBox(
+                height: 200,
+              ),
             ),
             Text(
               "Do you Agree?",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
             ),
             SizedBox(
               height: 20,
             ),
             Text(
               "Before you continue you must agree to the following conditions.\nClick the button below if you have read and agreed.",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w200),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w200),
             ),
             SizedBox(
               height: 80,

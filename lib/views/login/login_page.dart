@@ -36,7 +36,6 @@ class _LoginViewState extends State<LoginView> {
       children: [
         Expanded(child: Container()),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 20),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.white,

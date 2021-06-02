@@ -20,6 +20,8 @@ class SignUpView extends StatefulWidget {
   _SignUpViewState createState() => _SignUpViewState();
 }
 
+typedef Future<void> StringMessageCallback(String p);
+
 class _SignUpViewState extends State<SignUpView> {
   List<String> key;
   RsaKeyHelper helper;
@@ -58,7 +60,7 @@ class _SignUpViewState extends State<SignUpView> {
     });
   }
 
-  Future<void> registerUserKey() async {
+  Future<void> registerUserKey(String message) async {
     //TODO: Why is this stupid function running;
     dart_api.AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> keyPair = await generateRSAKeyPairAsync();
     TeamData d = TeamData(privateKey: await helper.encryptPrivateKey(keyPair.privateKey, key), publicKey: helper.encodePublicKeyToPem(keyPair.publicKey));
@@ -68,8 +70,7 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   Future<void> continueClicked() async {
-    Map<String, Future<void>> loadFunctions = {};
-    loadFunctions.putIfAbsent("Generating RSA Private and Public keys...", registerUserKey);
+    await registerUserKey("message");
   }
 
   @override
@@ -77,7 +78,12 @@ class _SignUpViewState extends State<SignUpView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       TeamData main = await TeamDataProvider.getMain();
       if (main.id != -1) {
-        showDialog(context: context, builder: (_) => deletePreviousUserDialog());
+        bool result = await showDialog(context: context, builder: (_) => deletePreviousUserDialog(), barrierDismissible: false);
+        if (result) {
+          await TeamDataProvider.deleteMain();
+        } else {
+          widget.closeThis();
+        }
       }
     });
     return Column(
@@ -85,7 +91,6 @@ class _SignUpViewState extends State<SignUpView> {
       children: [
         Expanded(child: Container()),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 20),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -215,14 +220,15 @@ class _SignUpViewState extends State<SignUpView> {
         CupertinoDialogAction(
           child: Text("Yes"),
           onPressed: () {
-            TeamDataProvider.deleteMain();
+            Navigator.pop(context, true);
           },
-          isDestructiveAction: true,
         ),
         CupertinoDialogAction(
           child: Text("No"),
-          onPressed: widget.closeThis,
-          isDestructiveAction: true,
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+          isDefaultAction: true,
         ),
       ],
     );
